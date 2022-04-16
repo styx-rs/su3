@@ -1,0 +1,12 @@
+[package]
+name = "su3"
+description = "SU3 file en-/decoder"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[dependencies]
+deku = "0.13.0"
+flate2 = "1.0.23"
+
+[features]
