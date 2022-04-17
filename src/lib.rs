@@ -19,6 +19,9 @@ use std::{
     str::{self, Utf8Error},
 };
 
+#[cfg(test)]
+mod tests;
+
 /// Minimum length of the version field
 const MIN_VERSION_LENGTH: u8 = 16;
 
@@ -144,6 +147,7 @@ pub struct Su3<'a> {
     pub unused_0: u8,
 
     /// SU3 file format version
+    #[deku(assert_eq = "0")]
     pub format_version: u8,
 
     /// Signature type
@@ -212,14 +216,14 @@ pub struct Su3<'a> {
 }
 
 impl<'a> Su3<'a> {
-    /// Return the decompressed representation of the content
+    /// Return the possibly decompressed representation of the content
     ///
     /// Note: This will only decompress the `TxtGz` and `XmlGz` types. ZIP files are not handled
     ///
     /// # Errors
     ///
     /// Returns an IO error in case the decompression of the GZ compressed content fails
-    pub fn decompressed_content(&self) -> io::Result<Cow<'a, [u8]>> {
+    pub fn content(&self) -> io::Result<Cow<'a, [u8]>> {
         let content = match self.file_type {
             FileType::TxtGz | FileType::XmlGz => {
                 let mut gz = GzDecoder::new(self.raw_content);
