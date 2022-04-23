@@ -173,6 +173,7 @@ pub struct Su3<'a> {
     pub unused_2: u8,
 
     /// Signer ID length (in bytes)
+    #[deku(update = "self.raw_signer_id.len()")]
     pub signer_id_length: u8,
 
     /// Content length (not including header or signature)
