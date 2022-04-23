@@ -23,7 +23,7 @@ use std::{
 mod tests;
 
 /// Minimum length of the version field
-const MIN_VERSION_LENGTH: u8 = 16;
+pub const MIN_VERSION_LENGTH: u8 = 16;
 
 /// Content type
 #[derive(Clone, Debug, DekuRead, DekuWrite, PartialEq, Eq, PartialOrd, Ord)]
