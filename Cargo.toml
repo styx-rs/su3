@@ -9,6 +9,6 @@ readme = "README.md"
 
 [dependencies]
 deku = "0.13.0"
-flate2 = "1.0.23"
+flate2 = "1.0.24"
 
 [features]
