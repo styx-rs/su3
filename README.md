@@ -1,16 +1,13 @@
 # su3
 
-
 En-/decoder for the SU3 file format used by I2P for sending reseed information, updates and more
 
 [Format specification](https://geti2p.net/spec/updates#su3-file-specification)
 
-Example:
+## License
 
-```rust
-let (_, parsed_su3) = Su3::from_bytes((su3_data, 0)).expect("Failed to parse SU3 file");
-let content = parsed_su3.content().expect("Failed to decompress content");
-```
+This crate is licensed under the [MIT license](https://opensource.org/licenses/MIT)
 
+### Contribution
 
-License: MIT
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, shall be licensed as MIT, without any additional terms or conditions.
