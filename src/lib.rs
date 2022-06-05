@@ -3,11 +3,21 @@
 //!
 //! [Format specification](https://geti2p.net/spec/updates#su3-file-specification)
 //!
+//! Example:
+//!
+//! ```
+//! # use su3::Su3;
+//! # use deku::DekuContainerRead;
+//! # let su3_data = include_bytes!("../assets/meeh_i2pseeds.su3");
+//! let (_, parsed_su3) = Su3::from_bytes((su3_data, 0)).expect("Failed to parse SU3 file");
+//! let content = parsed_su3.content().expect("Failed to decompress content");
+//! ```
+//!
 
-#![forbid(missing_docs, unsafe_code)]
+#![forbid(missing_docs, rust_2018_idioms, unsafe_code)]
 #![warn(clippy::all, clippy::pedantic)]
 
-pub extern crate deku;
+pub use deku;
 
 use deku::{
     DekuContainerRead, DekuContainerWrite, DekuEnumExt, DekuError, DekuRead, DekuUpdate, DekuWrite,
