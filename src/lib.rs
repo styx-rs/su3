@@ -249,12 +249,12 @@ impl<'a> Su3<'a> {
         str::from_utf8(self.raw_signer_id)
     }
 
-    /// Version in form of a string slice
+    /// Version in form of a string slice (without the null bytes)
     ///
     /// # Errors
     ///
     /// An error occurs when the version field of the file is not valid UTF-8
     pub fn version(&self) -> Result<&'a str, Utf8Error> {
-        str::from_utf8(self.raw_version)
+        str::from_utf8(self.raw_version).map(|version| version.trim_matches(|r#char| char == '\0'))
     }
 }
