@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["MIN_VERSION_LENGTH","Minimum length of the version field"]],"enum":[["ContentType","Content type"],["FileType","File type"],["SignatureType","Signature type"]],"struct":[["Su3","Typed representation of an SU3 file"]]});
