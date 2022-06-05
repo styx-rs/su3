@@ -1,12 +1,13 @@
 [package]
 name = "su3"
 description = "SU3 file en-/decoder"
-categories = ["parser-implementations", "parsing"]
-version = "0.0.1"
+categories = ["parser-implementations"]
+version = "0.0.2"
 repository = "https://github.com/styx-rs/su3"
 edition = "2021"
 license = "MIT"
 readme = "README.md"
+exclude = ["assets/"]
 
 [dependencies]
 deku = "0.13.0"
