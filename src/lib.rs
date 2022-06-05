@@ -249,7 +249,7 @@ impl<'a> Su3<'a> {
         str::from_utf8(self.raw_signer_id)
     }
 
-    /// Version in form of a string slice
+    /// Version in form of a string slice (without the null bytes)
     ///
     /// # Errors
     ///
