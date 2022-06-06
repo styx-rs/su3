@@ -17,7 +17,7 @@ where
 }
 
 /// Deserialise an byte slice into its typed SU3 representation
-#[allow(clippy::missing_panics_doc, clippy::missing_errors_doc)]
+#[allow(clippy::missing_errors_doc)]
 pub fn deserialise(data: &[u8]) -> IResult<&[u8], Su3<'_>> {
     let (
         rest,
