@@ -187,6 +187,7 @@ impl<'a> Su3<'a> {
     #[cfg(feature = "compression")]
     pub fn content(&self) -> std::io::Result<std::borrow::Cow<'a, [u8]>> {
         use flate2::read::GzDecoder;
+        use std::{borrow::Cow, io::Read};
 
         let content = match self.file_type {
             FileType::TxtGz | FileType::XmlGz => {

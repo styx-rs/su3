@@ -7,7 +7,7 @@ Deserialisation is built on top of [nom](https://docs.rs/nom) and serialisation 
 
 ## Features
 
-- `compress`: Helper function to decompress the content when appropriate
+- `compression`: Helper function to decompress the content when appropriate
 
 ## License
 
