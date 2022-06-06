@@ -9,9 +9,9 @@ use cookie_factory::{
     GenError, SerializeFn,
 };
 
-pub fn serialise<'a, W>(su3: &'a Su3<'a>) -> impl SerializeFn<W> + 'a
+pub fn serialise<'w, W>(su3: &'w Su3<'_>) -> impl SerializeFn<W> + 'w
 where
-    W: Write + 'a,
+    W: Write,
 {
     |ctx| {
         if su3.raw_version.len() < 16 {

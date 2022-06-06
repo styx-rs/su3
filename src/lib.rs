@@ -218,9 +218,9 @@ impl<'a> Su3<'a> {
     /// The generator returned by this function exiting with `CustomError(1)` means that the version length is below 16 bytes.  
     /// If this error occurs you have to pad the bytes with null bytes.
     #[must_use]
-    pub fn serialise<W>(&'a self) -> impl SerializeFn<W> + 'a
+    pub fn serialise<'w, W>(&'w self) -> impl SerializeFn<W> + 'w
     where
-        W: Write + 'a,
+        W: Write + 'w,
     {
         ser::serialise(self)
     }
