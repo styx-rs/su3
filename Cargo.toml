@@ -2,7 +2,7 @@
 name = "su3"
 description = "SU3 file en-/decoder"
 categories = ["parser-implementations"]
-version = "0.0.2"
+version = "0.1.0"
 repository = "https://github.com/styx-rs/su3"
 edition = "2021"
 license = "MIT"
@@ -10,7 +10,8 @@ readme = "README.md"
 exclude = ["assets/"]
 
 [dependencies]
-deku = "0.13.0"
-flate2 = "1.0.24"
+cookie-factory = { version = "0.3.2", default-features = false }
+flate2 = { version = "1.0.24", optional = true }
+nom = { version = "7.1.1", default-features = false }
 
 [features]
