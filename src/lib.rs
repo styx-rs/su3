@@ -6,7 +6,7 @@
 //! ```
 //! # use su3::Su3;
 //! # let su3_data = include_bytes!("../assets/meeh_i2pseeds.su3");
-//! let (_, parsed_su3) = su3::deserialise(su3_data).expect("Failed to parse SU3 file");
+//! let (_, parsed_su3) = Su3::deserialise(su3_data).expect("Failed to parse SU3 file");
 //! ```
 //!
 
@@ -16,6 +16,9 @@
 
 use core::str::{self, Utf8Error};
 
+use cookie_factory::{lib::std::io::Write, SerializeFn};
+use nom::IResult;
+
 mod de;
 #[macro_use]
 mod macros;
@@ -23,8 +26,6 @@ mod ser;
 
 /// Magic bytes
 const MAGIC_BYTES: &[u8] = b"I2Psu3";
-
-pub use self::{de::deserialise, ser::serialise};
 
 /// Minimum length of the version field
 pub const MIN_VERSION_LENGTH: u8 = 16;
@@ -176,6 +177,12 @@ pub struct Su3<'a> {
 }
 
 impl<'a> Su3<'a> {
+    /// Deserialise a byte slice into its typed SU3 representation
+    #[allow(clippy::missing_errors_doc)]
+    pub fn deserialise(data: &'a [u8]) -> IResult<&[u8], Self> {
+        de::deserialise(data)
+    }
+
     /// Return the possibly decompressed representation of the content
     ///
     /// Note: This will only decompress the `TxtGz` and `XmlGz` types. ZIP files are not handled
@@ -202,6 +209,20 @@ impl<'a> Su3<'a> {
         };
 
         Ok(content)
+    }
+
+    /// Construct a [`SerializeFn`] from the SU3 struct
+    ///
+    /// # Errors
+    ///
+    /// The generator returned by this function exiting with `CustomError(1)` means that the version length is below 16 bytes.  
+    /// If this error occurs you have to pad the bytes with null bytes.
+    #[must_use]
+    pub fn serialise<W>(&'a self) -> impl SerializeFn<W> + 'a
+    where
+        W: Write + 'a,
+    {
+        ser::serialise(self)
     }
 
     /// Signer ID in form of a string slice

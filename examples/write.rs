@@ -9,6 +9,6 @@ fn main() {
     };
 
     let mut buffer = [0_u8; 100];
-    su3::serialise(&su3)((&mut buffer[..]).into()).expect("Failed to serialise SU3 file");
+    su3.serialise()((&mut buffer[..]).into()).expect("Failed to serialise SU3 file");
     println!("{buffer:#?}");
 }

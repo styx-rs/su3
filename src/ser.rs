@@ -9,13 +9,6 @@ use cookie_factory::{
     GenError, SerializeFn,
 };
 
-/// Serialise the SU3 struct into its byte representation
-///
-/// # Errors
-///
-/// The generator returned by this function exiting with `CustomError(1)` means that the version length is below 16 bytes.  
-/// If this error occurs you have to pad the bytes with null bytes.
-#[must_use]
 pub fn serialise<'a, W>(su3: &'a Su3<'a>) -> impl SerializeFn<W> + 'a
 where
     W: Write + 'a,
