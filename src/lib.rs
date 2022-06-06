@@ -10,7 +10,7 @@
 //! ```
 //!
 
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 #![forbid(missing_docs, rust_2018_idioms, unsafe_code)]
 #![warn(clippy::all, clippy::pedantic)]
 
@@ -183,8 +183,8 @@ impl<'a> Su3<'a> {
     /// # Errors
     ///
     /// Returns an IO error in case the decompression of the GZ compressed content fails
-    #[cfg_attr(docsrs, doc(cfg(feature = "flate2")))]
-    #[cfg(feature = "flate2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "compression")))]
+    #[cfg(feature = "compression")]
     pub fn content(&self) -> std::io::Result<std::borrow::Cow<'a, [u8]>> {
         use flate2::read::GzDecoder;
 

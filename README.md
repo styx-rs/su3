@@ -5,6 +5,10 @@ Deserialisation is built on top of [nom](https://docs.rs/nom) and serialisation 
 
 [Format specification](https://geti2p.net/spec/updates#su3-file-specification)
 
+## Features
+
+- `compress`: Helper function to decompress the content when appropriate
+
 ## License
 
 This crate is licensed under the [MIT license](https://opensource.org/licenses/MIT)

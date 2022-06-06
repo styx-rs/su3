@@ -64,9 +64,9 @@ pub fn deserialise(data: &[u8]) -> IResult<&[u8], Su3<'_>> {
     ))(rest)?;
 
     let su3 = Su3 {
-        signature_type: signature_type.try_into().unwrap(),
-        file_type: file_type.try_into().unwrap(),
-        content_type: content_type.try_into().unwrap(),
+        signature_type: signature_type.try_into()?,
+        file_type: file_type.try_into()?,
+        content_type: content_type.try_into()?,
         raw_version,
         raw_signer_id,
         raw_content,

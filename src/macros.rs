@@ -37,14 +37,16 @@ macro_rules! try_from_number {
         }
 
         impl ::core::convert::TryFrom<$num_type> for $enum_name {
-            type Error = ();
+            type Error = ::nom::Err<::nom::error::Error<&'static [u8]>>;
 
             fn try_from(num: $num_type) -> Result<Self, Self::Error> {
+                use ::nom::{Err, error::{Error, ErrorKind}};
+
                 match num {
                     $(
                         $value => Ok(Self::$variant),
                     )*
-                    _ => Err(())
+                    _ => Err(Err::Failure(Error::new(&[], ErrorKind::Digit)))
                 }
             }
         }
