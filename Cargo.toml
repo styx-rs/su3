@@ -10,7 +10,7 @@ readme = "README.md"
 exclude = ["assets/"]
 
 [dependencies]
-deku = "0.14.0"
-flate2 = "1.0.24"
+deku = "0.15.0"
+flate2 = "1.0.25"
 
 [features]
