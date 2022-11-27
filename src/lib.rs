@@ -4,54 +4,53 @@
 //! # Examples
 //!
 //! ```
-//! # use deku::DekuContainerRead;
 //! # use su3::Su3;
 //! # let su3_data = include_bytes!("../assets/meeh_i2pseeds.su3");
-//! let (_, parsed_su3) = Su3::from_bytes((su3_data, 0)).expect("Failed to parse SU3 file");
-//! let content = parsed_su3.content().expect("Failed to decompress content");
+//! let (_, parsed_su3) = Su3::deserialise(su3_data).expect("Failed to parse SU3 file");
 //! ```
 //!
 
+#![cfg_attr(not(feature = "std"), no_std)]
 #![forbid(missing_docs, rust_2018_idioms, unsafe_code)]
 #![warn(clippy::all, clippy::pedantic)]
 
-pub use deku;
+use cookie_factory::{lib::std::io::Write, SerializeFn};
+use core::str::{self, Utf8Error};
+use nom::IResult;
 
-use deku::{DekuContainerWrite, DekuEnumExt, DekuError, DekuRead, DekuUpdate, DekuWrite};
-use flate2::read::GzDecoder;
-use std::{
-    borrow::Cow,
-    io::{self, Read},
-    str::{self, Utf8Error},
-};
+mod de;
+#[macro_use]
+mod macros;
+mod ser;
 
-#[cfg(test)]
-mod tests;
+/// Magic bytes
+const MAGIC_BYTES: &[u8] = b"I2Psu3";
 
 /// Minimum length of the version field
 pub const MIN_VERSION_LENGTH: u8 = 16;
 
-/// Content type
-#[derive(Clone, Debug, DekuRead, DekuWrite, PartialEq, Eq, PartialOrd, Ord)]
-#[deku(ctx = "endian: deku::ctx::Endian", endian = "endian", type = "u8")]
-pub enum ContentType {
-    /// Unknown content type
-    Unknown = 0x00,
+try_from_number! {
+    /// Content type
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+    pub enum ContentType: u8 {
+        /// Unknown content type
+        Unknown = 0x00,
 
-    /// Router update
-    RouterUpdate,
+        /// Router update
+        RouterUpdate = 0x01,
 
-    /// Plugin (update)
-    Plugin,
+        /// Plugin (update)
+        Plugin = 0x02,
 
-    /// Reseed data
-    ReseedData,
+        /// Reseed data
+        ReseedData = 0x03,
 
-    /// News feed
-    NewsFeed,
+        /// News feed
+        NewsFeed = 0x04,
 
-    /// Blocklist feed
-    BlocklistFeed,
+        /// Blocklist feed
+        BlocklistFeed = 0x05,
+    }
 }
 
 impl Default for ContentType {
@@ -60,30 +59,31 @@ impl Default for ContentType {
     }
 }
 
-/// File type
-#[derive(Clone, Debug, DekuRead, DekuWrite, PartialEq, Eq, PartialOrd, Ord)]
-#[deku(ctx = "endian: deku::ctx::Endian", endian = "endian", type = "u8")]
-pub enum FileType {
-    /// ZIP file
-    Zip = 0x00,
+try_from_number! {
+    /// File type
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+    pub enum FileType: u8 {
+        /// ZIP file
+        Zip = 0x00,
 
-    /// XML file
-    Xml,
+        /// XML file
+        Xml = 0x01,
 
-    /// HTML file
-    Html,
+        /// HTML file
+        Html = 0x02,
 
-    /// GZ compressed XML file
-    XmlGz,
+        /// GZ compressed XML file
+        XmlGz = 0x03,
 
-    /// GZ compressed TXT file
-    TxtGz,
+        /// GZ compressed TXT file
+        TxtGz = 0x04,
 
-    /// DMG file
-    Dmg,
+        /// DMG file
+        Dmg = 0x05,
 
-    /// EXE file
-    Exe,
+        /// EXE file
+        Exe = 0x06,
+    }
 }
 
 impl Default for FileType {
@@ -92,33 +92,34 @@ impl Default for FileType {
     }
 }
 
-/// Signature type
-#[derive(Clone, Debug, DekuRead, DekuWrite, PartialEq, Eq, PartialOrd, Ord)]
-#[deku(ctx = "endian: deku::ctx::Endian", endian = "endian", type = "u16")]
-pub enum SignatureType {
-    /// DSA-SHA1
-    DsaSha1 = 0x0000,
+try_from_number! {
+    /// Signature type
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+    pub enum SignatureType: u16 {
+        /// DSA-SHA1
+        DsaSha1 = 0x0000,
 
-    /// ECDSA-SHA256-P256
-    EcdsaSha256P256 = 0x0001,
+        /// ECDSA-SHA256-P256
+        EcdsaSha256P256 = 0x0001,
 
-    /// ECDSA-SHA384-P384
-    EcdsaSha384P384 = 0x0002,
+        /// ECDSA-SHA384-P384
+        EcdsaSha384P384 = 0x0002,
 
-    /// ECDSA-SHA512-P521
-    EcdsaSha512P521 = 0x0003,
+        /// ECDSA-SHA512-P521
+        EcdsaSha512P521 = 0x0003,
 
-    /// RSA-SHA256-2048
-    RsaSha2562048 = 0x0004,
+        /// RSA-SHA256-2048
+        RsaSha2562048 = 0x0004,
 
-    /// RSA-SHA384-3072
-    RsaSha3843072 = 0x0005,
+        /// RSA-SHA384-3072
+        RsaSha3843072 = 0x0005,
 
-    /// RSA-SHA512-4096
-    RsaSha5124096 = 0x0006,
+        /// RSA-SHA512-4096
+        RsaSha5124096 = 0x0006,
 
-    /// EdDSA-SHA512-Ed25519ph
-    EddsaSha512Ed25519ph = 0x0008,
+        /// EdDSA-SHA512-Ed25519ph
+        EddsaSha512Ed25519ph = 0x0008,
+    }
 }
 
 impl SignatureType {
@@ -146,83 +147,41 @@ impl Default for SignatureType {
 }
 
 /// Typed representation of an SU3 file
-#[derive(Clone, Debug, Default, DekuRead, DekuWrite, PartialEq, Eq, PartialOrd, Ord)]
-#[deku(endian = "big", magic = b"I2Psu3")]
+#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Su3<'a> {
-    /// Unused field
-    pub unused_0: u8,
-
-    /// SU3 file format version
-    #[deku(assert_eq = "0")]
-    pub format_version: u8,
-
     /// Signature type
     pub signature_type: SignatureType,
-
-    /// Signature length
-    #[deku(update = "self.signature_type.length()")]
-    pub signature_length: u16,
-
-    /// Unused field
-    pub unused_1: u8,
-
-    /// Version length (in bytes; includes padding)
-    ///
-    /// Has to be at least 16
-    #[deku(
-        assert = "*version_length >= MIN_VERSION_LENGTH",
-        update = "self.raw_version.len()"
-    )]
-    pub version_length: u8,
-
-    /// Unused field
-    pub unused_2: u8,
-
-    /// Signer ID length (in bytes)
-    #[deku(update = "self.raw_signer_id.len()")]
-    pub signer_id_length: u8,
-
-    /// Content length (not including header or signature)
-    #[deku(update = "self.raw_content.len()")]
-    pub content_length: u64,
-
-    /// Unused field
-    pub unused_3: u8,
 
     /// File type
     pub file_type: FileType,
 
-    /// Unused field
-    pub unused_4: u8,
-
     /// Content type
     pub content_type: ContentType,
-
-    /// Unused field
-    pub unused_5: [u8; 12],
 
     /// Version (UTF-8 padded with null bytes)
     ///
     /// At least 16 bytes in length (length specified by field `version_length`)
-    #[deku(count = "version_length")]
     pub raw_version: &'a [u8],
 
     /// Signer ID (eg. "zzz@mail.i2p"; UTF-8 encoded; no padding, length specified by field `signer_id_length`)
-    #[deku(count = "signer_id_length")]
     pub raw_signer_id: &'a [u8],
 
     /// Raw content
-    #[deku(count = "content_length")]
     pub raw_content: &'a [u8],
 
     /// Signature (length specified by field `signature_length`)
     ///
     /// The signature covers the everything preceding this field
-    #[deku(count = "signature_length")]
     pub raw_signature: &'a [u8],
 }
 
 impl<'a> Su3<'a> {
+    /// Deserialise a byte slice into its typed SU3 representation
+    #[allow(clippy::missing_errors_doc)]
+    pub fn deserialise(data: &'a [u8]) -> IResult<&[u8], Self> {
+        de::deserialise(data)
+    }
+
     /// Return the possibly decompressed representation of the content
     ///
     /// Note: This will only decompress the `TxtGz` and `XmlGz` types. ZIP files are not handled
@@ -230,7 +189,12 @@ impl<'a> Su3<'a> {
     /// # Errors
     ///
     /// Returns an IO error in case the decompression of the GZ compressed content fails
-    pub fn content(&self) -> io::Result<Cow<'a, [u8]>> {
+    #[cfg_attr(docsrs, doc(cfg(feature = "compression")))]
+    #[cfg(feature = "compression")]
+    pub fn content(&self) -> std::io::Result<std::borrow::Cow<'a, [u8]>> {
+        use flate2::read::GzDecoder;
+        use std::{borrow::Cow, io::Read};
+
         let content = match self.file_type {
             FileType::TxtGz | FileType::XmlGz => {
                 let mut gz = GzDecoder::new(self.raw_content);
@@ -244,6 +208,20 @@ impl<'a> Su3<'a> {
         };
 
         Ok(content)
+    }
+
+    /// Construct a [`SerializeFn`] from the SU3 struct
+    ///
+    /// # Errors
+    ///
+    /// The generator returned by this function exiting with `CustomError(1)` means that the version length is below 16 bytes.  
+    /// If this error occurs you have to pad the bytes with null bytes.
+    #[must_use]
+    pub fn serialise<'w, W>(&'w self) -> impl SerializeFn<W> + 'w
+    where
+        W: Write + 'w,
+    {
+        ser::serialise(self)
     }
 
     /// Signer ID in form of a string slice

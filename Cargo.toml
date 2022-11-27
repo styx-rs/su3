@@ -10,7 +10,11 @@ readme = "README.md"
 exclude = ["assets/"]
 
 [dependencies]
-deku = "0.15.0"
-flate2 = "1.0.25"
+cookie-factory = { version = "0.3.2", default-features = false }
+flate2 = { version = "1.0.25", optional = true }
+nom = { version = "7.1.1", default-features = false }
 
 [features]
+default = ["std"]
+compression = ["flate2", "std"]
+std = ["cookie-factory/std", "nom/std"]
