@@ -17,9 +17,7 @@
 
 pub use deku;
 
-use deku::{
-    DekuContainerRead, DekuContainerWrite, DekuEnumExt, DekuError, DekuRead, DekuUpdate, DekuWrite,
-};
+use deku::{DekuContainerWrite, DekuEnumExt, DekuError, DekuRead, DekuUpdate, DekuWrite};
 use flate2::read::GzDecoder;
 use std::{
     borrow::Cow,
