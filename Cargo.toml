@@ -15,5 +15,6 @@ flate2 = { version = "1.0.24", optional = true }
 nom = { version = "7.1.1", default-features = false }
 
 [features]
+default = ["std"]
 compression = ["flate2", "std"]
 std = ["cookie-factory/std", "nom/std"]

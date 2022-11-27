@@ -2,7 +2,7 @@
 ///
 /// Usage:
 ///
-/// ```
+/// ```ignore
 /// try_from_number! {
 ///     pub enum Test: u8 {
 ///         A = 0x01,

@@ -14,9 +14,8 @@
 #![forbid(missing_docs, rust_2018_idioms, unsafe_code)]
 #![warn(clippy::all, clippy::pedantic)]
 
-use core::str::{self, Utf8Error};
-
 use cookie_factory::{lib::std::io::Write, SerializeFn};
+use core::str::{self, Utf8Error};
 use nom::IResult;
 
 mod de;

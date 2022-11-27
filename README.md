@@ -8,6 +8,7 @@ Deserialisation is built on top of [nom](https://docs.rs/nom) and serialisation 
 ## Features
 
 - `compression`: Helper function to decompress the content when appropriate
+- `std` (enabled by default): Enabled the `std` feature on `cookie-factory` and `nom`. Uses the actual `std::io::Write` trait instead of `cookie-factory`'s polyfill
 
 ## License
 
