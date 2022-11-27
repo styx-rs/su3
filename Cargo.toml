@@ -2,7 +2,7 @@
 name = "su3"
 description = "SU3 file en-/decoder"
 categories = ["parser-implementations"]
-version = "0.1.0"
+version = "0.2.0"
 repository = "https://github.com/styx-rs/su3"
 edition = "2021"
 license = "MIT"
